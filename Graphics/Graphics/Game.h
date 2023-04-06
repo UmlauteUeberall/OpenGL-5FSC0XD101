@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <iostream>
 
+#include "Shader.h"
+
 void FrameBufferSizeCallback(GLFWwindow* _window, int _width, int _height);
 
 class CGame
@@ -17,18 +19,12 @@ public:
 private:
 	GLFWwindow* m_window = nullptr;
 
-	const char* m_vertexShaderSource = "#version 460 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"void main()\n"
-		"{\n"
-		"	gl_Position = vec4(aPos, 1.0);\n"
-		"}\0";
-	const char* m_fragmentShaderSource = "#version 460 core\n"
-		"out vec4 FragColor;\n"
-		"void main()\n"
-		"{\n"
-		"	FragColor = vec4(1,0.5,0,1);\n"
-		"}\0";
+	CShader* m_defaultShader;
+
+	
+	unsigned int m_VBO = 0;   // Vertex Buffer Object
+	unsigned int m_VAO = 0;   // Vertex Array Object
+	unsigned int m_EBO = 0;   // Element Buffer Object (Indexbuffer)
 
 	CGame()
 	{}
