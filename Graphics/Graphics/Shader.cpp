@@ -6,8 +6,8 @@
 
 CShader::CShader(const char* _vertexPath, const char* _fragmentPath)
 {
-	const char* vertexCode;
-	const char* fragmentCode;
+	std::string vertexCode;
+	std::string fragmentCode;
 
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
@@ -18,7 +18,7 @@ CShader::CShader(const char* _vertexPath, const char* _fragmentPath)
 	try
 	{
 		vShaderFile.open(_vertexPath);
-		vShaderFile.open(_fragmentPath);
+		fShaderFile.open(_fragmentPath);
 
 		std::stringstream vShaderStream;
 		std::stringstream fShaderStream;
@@ -29,23 +29,26 @@ CShader::CShader(const char* _vertexPath, const char* _fragmentPath)
 		vShaderFile.close();
 		fShaderFile.close();
 
-		vertexCode = vShaderStream.str().c_str();
-		fragmentCode = fShaderStream.str().c_str();
+		vertexCode = vShaderStream.str();
+		fragmentCode = fShaderStream.str();
 	}
 	catch (std::ifstream::failure& _e)
 	{
 		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << _e.what() << std::endl;
         return;
 	}
+    const char* vertexCodeC = vertexCode.c_str();
+    const char* fragmentCodeC = fragmentCode.c_str();
 
     // Vertexshader führt Umrechnungen in anderen Koordinatensyteme durch
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexCode, nullptr);
+    glShaderSource(vertexShader, 1, &vertexCodeC, nullptr);
     glCompileShader(vertexShader);
     CheckCompileErrors(vertexShader, "VERTEX");
 
+    // Fragmentshader zeigt Pixel auf dem Bildschirm an
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentCode, nullptr);
+    glShaderSource(fragmentShader, 1, &fragmentCodeC, nullptr);
     glCompileShader(fragmentShader);
     CheckCompileErrors(vertexShader, "FRAGMENT");
 
@@ -58,7 +61,6 @@ CShader::CShader(const char* _vertexPath, const char* _fragmentPath)
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-
 }
 
 void CShader::Use()
@@ -95,7 +97,6 @@ bool CShader::CheckCompileErrors(int _shaderID, std::string _type)
             return -6;
         }
     }
-
 
     return true;
 }

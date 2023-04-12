@@ -21,6 +21,8 @@ private:
 
 	CShader* m_defaultShader;
 
+	unsigned int m_texture1;
+	unsigned int m_texture2;
 	
 	unsigned int m_VBO = 0;   // Vertex Buffer Object
 	unsigned int m_VAO = 0;   // Vertex Array Object
@@ -40,6 +42,8 @@ public:
 	int Initialize();
 	int Run();
 	void Finalize();
+
+	unsigned int LoadTexture(const char* _path);
 
 private:
 
