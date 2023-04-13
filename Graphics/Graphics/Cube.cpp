@@ -1,4 +1,5 @@
 #include "Cube.h"
+#include "Game.h"
 
 CCube::CCube(glm::vec3 _pos)
 	: CEntity(_pos)
@@ -74,6 +75,9 @@ CCube::CCube(glm::vec3 _pos)
 	m_indices[i++] = 6;
 	m_indices[i++] = 5;
 	m_indices[i++] = 4;
+
+	m_texture1 = CGame::Get()->LoadTexture("Test.jpg");
+	m_texture2 = CGame::Get()->LoadTexture("Smiley2.png");
 }
 CCube::~CCube()
 {

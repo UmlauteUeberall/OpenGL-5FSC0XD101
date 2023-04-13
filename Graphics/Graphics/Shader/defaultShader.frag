@@ -20,5 +20,5 @@ void main()
 {
 	FragColor = mix(texture(tex1, ourUV / uvZoom), texture(tex2, ourUV * uvZoom), textureBlend);
 	//FragColor = vec4(texture(tex1, ourUV).rgb * ourColor * extraColor,1);
-	//FragColor = vec4(ourUV, 0, 1);
+	//FragColor = vec4(ourColor, 1);
 }
