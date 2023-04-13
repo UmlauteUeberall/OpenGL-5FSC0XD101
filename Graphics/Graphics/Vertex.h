@@ -1,13 +1,22 @@
 #pragma once
-#include "Vector.h"
+#include <vec2.hpp>
+#include <vec3.hpp>
+#include <vec4.hpp>
 
 struct Vertex
 {
-	Vector3 pos;
-	Vector3 col;
-	Vector2 uv;
+	glm::vec3 pos;
+	glm::vec4 col;
+	glm::vec2 uv;
 
-	Vertex(Vector3 _position, Vector3 _color, Vector2 _uv)
+	Vertex()
+	{
+		pos = glm::vec3(0, 0, 0);
+		col = glm::vec4(0, 0, 0, 0);
+		uv = glm::vec2(0, 0);
+	}
+
+	Vertex(glm::vec3 _position, glm::vec4 _color, glm::vec2 _uv)
 	{
 		pos = _position;
 		col = _color;

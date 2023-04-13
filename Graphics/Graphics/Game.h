@@ -3,8 +3,10 @@
 #include <GLFW/glfw3.h>
 #include <Windows.h>
 #include <iostream>
-
+#include <list>
 #include "Shader.h"
+#include "Entity.h"
+
 
 void FrameBufferSizeCallback(GLFWwindow* _window, int _width, int _height);
 
@@ -16,17 +18,23 @@ public:
 	const char* WINDOW_TITLE = "Super Fancy Project";
 
 
+	CShader* m_defaultShader;
+	glm::vec3 m_cameraPos;
+
+	inline double DeltaTime()
+	{
+		return m_deltaTime;
+	}
+
 private:
 	GLFWwindow* m_window = nullptr;
+	double m_deltaTime;
 
-	CShader* m_defaultShader;
+	std::list<CEntity*> m_entitites;
+	std::list<CEntity*> m_entititesToDelete;
 
-	unsigned int m_texture1;
-	unsigned int m_texture2;
-	
-	unsigned int m_VBO = 0;   // Vertex Buffer Object
-	unsigned int m_VAO = 0;   // Vertex Array Object
-	unsigned int m_EBO = 0;   // Element Buffer Object (Indexbuffer)
+	glm::mat4 m_viewMatrix;
+	glm::mat4 m_projectionMatrix;
 
 	CGame()
 	{}
@@ -43,9 +51,13 @@ public:
 	int Run();
 	void Finalize();
 
+	bool AddEntity(CEntity* _entity);
+	bool RemoveEntity(CEntity* _entity);
+	bool ContainsEntity(CEntity* _entity);
+
 	unsigned int LoadTexture(const char* _path);
 
 private:
-
+	void LoadLevel();
 };
 

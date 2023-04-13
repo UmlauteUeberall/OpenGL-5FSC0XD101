@@ -1,6 +1,9 @@
 #include "Game.h"
 #include "Vertex.h"
 #include "stb_image.h"
+#include "Quad.h"
+#include "Cube.h"
+
 
 int CGame::Initialize()
 {
@@ -33,80 +36,54 @@ int CGame::Initialize()
 
 	m_defaultShader = new CShader("defaultShader.vert", "defaultShader.frag");
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	Vertex vertices[]
-	{
-		{Vector3(-0.5f, 0.5, 0.0), Vector3(0.882f, 0.0313f, 0.91f), Vector2(0,0)},
-		{Vector3(0.5f, 0.5, 0.0), Vector3(1,0,0), Vector2(1,0)},
-		{Vector3(0.5f, -0.5, 0.0), Vector3(1,1,0), Vector2(1,1)},
-		{Vector3(-0.5f, -0.5, 0.0), Vector3(0.2f,0.49f,0.82f), Vector2(0,1)},
-	};
+	m_cameraPos = glm::vec3(0, 0, -3);
 
-	unsigned int indices[]
-	{
-		0, 1, 3,
-		1, 2, 3
-	};
+	
 
-
-	glGenVertexArrays(1, &m_VAO);
-	glGenBuffers(1, &m_VBO);
-	glGenBuffers(1, &m_EBO);
-
-	glBindVertexArray(m_VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, sizeof(Vector3) / sizeof(float), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, sizeof(Vector3) / sizeof(float), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, col));
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(2, sizeof(Vector2) / sizeof(float), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
-	glEnableVertexAttribArray(2);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glBindVertexArray(0);
-
-	m_texture1 = LoadTexture("Test.jpg");
-	m_texture2 = LoadTexture("Smiley2.png");
+	LoadLevel();
 
 	return 0;
 }
 
 int CGame::Run()
 {
+	double oldTime = glfwGetTime();
+	double currentTime = oldTime;
 	while (!glfwWindowShouldClose(m_window))
 	{
 		// Backbuffer clear
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		// Variablen setzen
-		m_defaultShader->SetFloat("textureBlend", sin(glfwGetTime()) / 2.0f + 0.5f);
-		m_defaultShader->SetVector2("uvZoom", Vector2( sin(glfwGetTime()) / 2.0f + 0.5f,
-															cos(glfwGetTime() * 0.23) * 2));
+		oldTime = currentTime;
+		currentTime = glfwGetTime();
+		m_deltaTime = currentTime - oldTime;
 		
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_texture1);
-		m_defaultShader->SetInt("tex1", 0);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, m_texture2);
-		m_defaultShader->SetInt("tex2", 1);
+		for (auto itr : m_entitites)
+		{
+			itr->Update();
+		}
 
-		// Shader benutzung vorbereiten
-		m_defaultShader->Use();
-		glBindVertexArray(m_VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		m_viewMatrix = glm::mat4(1.0f);
+		m_viewMatrix = glm::translate(m_viewMatrix, m_cameraPos);
+		m_defaultShader->SetMatrix("view", m_viewMatrix);
+		
+		m_projectionMatrix = glm::mat4(1.0f);
+		m_projectionMatrix = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f);
+		m_defaultShader->SetMatrix("projection", m_projectionMatrix);
 
+		for (auto itr : m_entitites)
+		{
+			itr->Render();
+		}
+
+		for (auto itr : m_entititesToDelete)
+		{
+			m_entitites.remove(itr);
+			itr->CleanUp();
+			delete(itr);
+		}
 
 		glBindVertexArray(0);
 		glfwSwapBuffers(m_window);
@@ -118,12 +95,66 @@ int CGame::Run()
 
 void CGame::Finalize()
 {
-	glDeleteVertexArrays(1, &m_VAO);
-	glDeleteBuffers(1, &m_VBO);
-	glDeleteBuffers(1, &m_EBO);
+	for (auto itr : m_entititesToDelete)
+	{
+		m_entitites.remove(itr);
+		itr->CleanUp();
+		delete(itr);
+	}
+
+	for (auto itr : m_entitites)
+	{
+		itr->CleanUp();
+		delete(itr);
+	}
 
 	m_defaultShader->CleanUp();
 	glfwTerminate();
+}
+
+bool CGame::AddEntity(CEntity* _entity)
+{
+	if (!_entity || ContainsEntity(_entity))
+	{
+		return false;
+	}
+
+	if (_entity->Initialize())
+	{
+		m_entitites.push_back(_entity);
+		return true;
+	}
+
+	return false;
+}
+
+bool CGame::RemoveEntity(CEntity* _entity)
+{
+	if (!_entity || !ContainsEntity(_entity))
+	{
+		return false;
+	}
+	m_entititesToDelete.push_back(_entity);
+
+	return true;
+}
+
+bool CGame::ContainsEntity(CEntity* _entity)
+{
+	if (!_entity)
+	{
+		return false;
+	}
+
+	for (auto itr : m_entitites)
+	{
+		if (itr == _entity)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 unsigned int CGame::LoadTexture(const char* _path)
@@ -161,6 +192,12 @@ unsigned int CGame::LoadTexture(const char* _path)
 		return -4;
 	}
 	stbi_image_free(data);
+}
+
+void CGame::LoadLevel()
+{
+	//AddEntity(new CQuad(glm::vec3(0,0,0)));
+	AddEntity(new CCube(glm::vec3(0,0,0)));
 }
 
 void FrameBufferSizeCallback(GLFWwindow* _window, int _width, int _height)

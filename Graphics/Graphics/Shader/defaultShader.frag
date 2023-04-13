@@ -14,6 +14,8 @@ uniform vec2 uvZoom;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 
+
+
 void main()
 {
 	FragColor = mix(texture(tex1, ourUV / uvZoom), texture(tex2, ourUV * uvZoom), textureBlend);

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <glad/glad.h>
-#include "Vector.h"
-
+#include <vec2.hpp>
+#include <vec3.hpp>
 #include <string>
+#include <gtc/matrix_transform.hpp>
 
 class CShader
 {
@@ -29,14 +30,19 @@ public:
 		glUniform1f(glGetUniformLocation(m_shaderProgram, _name), _value);
 	}
 
-	void SetVector2(const char* _name, Vector2 _value)
+	void SetVector2(const char* _name, glm::vec2 _value)
 	{
 		glUniform2f(glGetUniformLocation(m_shaderProgram, _name), _value.x, _value.y);
 	}
 
-	void SetVector3(const char* _name, Vector3 _value)
+	void SetVector3(const char* _name, glm::vec3 _value)
 	{
 		glUniform3f(glGetUniformLocation(m_shaderProgram, _name), _value.x, _value.y, _value.z);
+	}
+
+	void SetMatrix(const char* _name, glm::mat4 _value)
+	{
+		glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram, _name), 1, GL_FALSE, &_value[0][0]);
 	}
 
 	void CleanUp();
