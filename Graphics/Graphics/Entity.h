@@ -12,7 +12,7 @@ public:
 
 	virtual bool Initialize();	// Erzeugen der Buffer
 	virtual void Update();		// Logikupdates, zb Objekt verschieben, auf Tastendruck reagieren
-	virtual void Render();		// Kommunikation mit der Grafikkarte
+	virtual void Render() = 0;	// Kommunikation mit der Grafikkarte
 	virtual void CleanUp();
 
 	glm::vec3 m_position;
@@ -23,8 +23,7 @@ public:
 	unsigned int m_VAO = 0;   // Vertex Array Object
 	unsigned int m_EBO = 0;   // Element Buffer Object (Indexbuffer)
 
-	unsigned int m_texture1;
-	unsigned int m_texture2;
+	
 
 protected:
 	Vertex* m_vertices;

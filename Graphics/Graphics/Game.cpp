@@ -3,6 +3,7 @@
 #include "stb_image.h"
 #include "Quad.h"
 #include "Cube.h"
+#include "PhongCube.h"
 
 
 int CGame::Initialize()
@@ -25,6 +26,7 @@ int CGame::Initialize()
 
 	glfwMakeContextCurrent(m_window);
 	glfwSetFramebufferSizeCallback(m_window, FrameBufferSizeCallback);
+	glfwSetCursorPosCallback(m_window, MouseCallBack);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -35,13 +37,28 @@ int CGame::Initialize()
 	glClearColor(0, 0.5f, 1, 1);
 
 	m_defaultShader = new CShader("defaultShader.vert", "defaultShader.frag");
+	m_phongShader = new CShader("phongShader.vert", "phongShader.frag");
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	m_cameraPos = glm::vec3(0, 0, -3);
+	glEnable(GL_DEPTH_TEST);
 
-	
+	m_cameraPos = glm::vec3(0, 4, -5);
+	m_cameraYaw = 90;
+	m_cameraPitch = -45;
+
+	m_projectionMatrix = glm::mat4(1.0f);
+	m_projectionMatrix = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f);
+	m_defaultShader->Use();
+	m_defaultShader->SetMatrix("projection", m_projectionMatrix);
+	m_phongShader->Use();
+	m_phongShader->SetMatrix("projection", m_projectionMatrix);
+
+	m_AmbientColor = glm::vec3(0.1f, 0.1f, 0.1f);
+	m_DiffuseColor = glm::vec3(0.8f, 0.8f, 0.8f);
+	m_SpecularColor = glm::vec3(1.0f, 1.0f, 1.0f);
+	m_LightDir = glm::vec3(0.1f, -1.0f, 1.0f);
 
 	LoadLevel();
 
@@ -52,26 +69,70 @@ int CGame::Run()
 {
 	double oldTime = glfwGetTime();
 	double currentTime = oldTime;
+
+	
 	while (!glfwWindowShouldClose(m_window))
 	{
-		// Backbuffer clear
-		glClear(GL_COLOR_BUFFER_BIT);
 		oldTime = currentTime;
 		currentTime = glfwGetTime();
 		m_deltaTime = currentTime - oldTime;
-		
+
+		if (glfwGetKey(m_window, GLFW_KEY_A))
+		{
+			m_cameraPos.x += m_deltaTime * CAMERA_SPEED;
+		}
+		if (glfwGetKey(m_window, GLFW_KEY_D))
+		{
+			m_cameraPos.x -= m_deltaTime * CAMERA_SPEED;
+		}
+		if (glfwGetKey(m_window, GLFW_KEY_W))
+		{
+			m_cameraPos.z += m_deltaTime * CAMERA_SPEED;
+		}
+		if (glfwGetKey(m_window, GLFW_KEY_S))
+		{
+			m_cameraPos.z -= m_deltaTime * CAMERA_SPEED;
+		}
+		if (glfwGetKey(m_window, GLFW_KEY_Q))
+		{
+			m_cameraPos.y -= m_deltaTime * CAMERA_SPEED;
+		}
+		if (glfwGetKey(m_window, GLFW_KEY_E))
+		{
+			m_cameraPos.y += m_deltaTime * CAMERA_SPEED;
+		}
+
+		//m_cameraYaw += m_mouseDelta.x * m_deltaTime * CAMERA_ROTATION_SPEED;
+		//m_cameraPitch += m_mouseDelta.y * m_deltaTime * CAMERA_ROTATION_SPEED;
+
+		m_cameraFront.x = cos(glm::radians(m_cameraYaw)) * cos(glm::radians(m_cameraPitch));
+		m_cameraFront.y = sin(glm::radians(m_cameraPitch));
+		m_cameraFront.z = sin(glm::radians(m_cameraYaw)) * cos(glm::radians(m_cameraPitch));
+
+		m_cameraFront = glm::normalize(m_cameraFront);
+		m_cameraRight = glm::normalize(glm::cross(m_cameraFront, glm::vec3(0, 1, 0)));
+		m_cameraUp = glm::normalize(glm::cross(m_cameraRight, m_cameraFront));
+
 		for (auto itr : m_entitites)
 		{
 			itr->Update();
 		}
 
-		m_viewMatrix = glm::mat4(1.0f);
-		m_viewMatrix = glm::translate(m_viewMatrix, m_cameraPos);
-		m_defaultShader->SetMatrix("view", m_viewMatrix);
+		// Backbuffer clear
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		m_projectionMatrix = glm::mat4(1.0f);
-		m_projectionMatrix = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f);
-		m_defaultShader->SetMatrix("projection", m_projectionMatrix);
+		//m_viewMatrix = glm::mat4(1.0f);
+		//m_viewMatrix = glm::translate(m_viewMatrix, m_cameraPos);
+		m_defaultShader->Use();
+		m_defaultShader->SetMatrix("view", glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp));
+		m_phongShader->Use();
+		m_phongShader->SetMatrix("view", glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp));
+		m_phongShader->SetVector3("AmbientColor", m_AmbientColor);
+		m_phongShader->SetVector3("DiffuseColor", m_DiffuseColor);
+		m_phongShader->SetVector3("SpecularColor", m_SpecularColor);
+		m_phongShader->SetVector3("LightDir", m_LightDir);
+		m_phongShader->SetVector3("CameraPos", m_cameraPos);
+
 
 		for (auto itr : m_entitites)
 		{
@@ -197,10 +258,22 @@ unsigned int CGame::LoadTexture(const char* _path)
 void CGame::LoadLevel()
 {
 	//AddEntity(new CQuad(glm::vec3(0,0,0)));
-	AddEntity(new CCube(glm::vec3(0,0,0)));
+	for (int i = 0; i < 10; i++)
+	{
+		AddEntity(new CCube(glm::vec3(i - 5, 0, 0)));
+	}
+
+	AddEntity(new CPhongCube(glm::vec3(0, 1, -2)));
 }
 
 void FrameBufferSizeCallback(GLFWwindow* _window, int _width, int _height)
 {
 	glViewport(0, 0, _width, _height);
+}
+
+void MouseCallBack(GLFWwindow* _window, double _xpos, double _ypos)
+{
+	glm::vec2 mousePos = glm::vec2(_xpos, _ypos);
+
+	CGame::Get()->m_mouseDelta = mousePos - CGame::Get()->m_oldMousePos;
 }

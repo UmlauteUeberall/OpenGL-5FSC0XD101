@@ -39,6 +39,9 @@
     <ClCompile Include="Cube.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="PhongCube.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -62,6 +65,9 @@
     <ClInclude Include="Cube.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="PhongCube.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="Shader\defaultShader.frag">
@@ -77,6 +83,12 @@
       <Filter>Ressourcendateien</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="Content\Test.jpg">
+      <Filter>Ressourcendateien</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="phongShader.frag">
+      <Filter>Ressourcendateien</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="phongShader.vert">
       <Filter>Ressourcendateien</Filter>
     </CopyFileToFolders>
   </ItemGroup>

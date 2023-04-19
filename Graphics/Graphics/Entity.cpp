@@ -50,35 +50,6 @@ void CEntity::Update()
 	m_rotation.z += CGame::Get()->DeltaTime() * 30;
 }
 
-void CEntity::Render()
-{
-	m_modelMatrix = glm::mat4(1);
-	m_modelMatrix = glm::translate(m_modelMatrix, m_position);
-	m_modelMatrix = glm::rotate(m_modelMatrix, glm::radians(m_rotation.x), glm::vec3(1, 0, 0));
-	m_modelMatrix = glm::rotate(m_modelMatrix, glm::radians(m_rotation.y), glm::vec3(0, 1, 0));
-	m_modelMatrix = glm::rotate(m_modelMatrix, glm::radians(m_rotation.z), glm::vec3(0,0,1));
-	m_modelMatrix = glm::scale(m_modelMatrix, m_scale);
-
-	m_shader->SetMatrix("model", m_modelMatrix);
-
-	// Variablen setzen
-	m_shader->SetFloat("textureBlend", sin(glfwGetTime()) / 2.0f + 0.5f);
-	m_shader->SetVector2("uvZoom", glm::vec2(sin(glfwGetTime()) / 2.0f + 0.5f,
-		cos(glfwGetTime() * 0.23) * 2));
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_texture1);
-	m_shader->SetInt("tex1", 0);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_texture2);
-	m_shader->SetInt("tex2", 1);
-
-	// Shader benutzung vorbereiten
-	m_shader->Use();
-	glBindVertexArray(m_VAO);
-	glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, 0);
-}
-
 void CEntity::CleanUp()
 {
 	glDeleteVertexArrays(1, &m_VAO);
