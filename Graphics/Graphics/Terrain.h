@@ -1,11 +1,11 @@
 #pragma once
 #include "Entity.h"
-class CPhongCube :
+class CTerrain :
     public CEntity
 {
 public:
-    CPhongCube(glm::vec3 _pos);
-    virtual ~CPhongCube();
+    CTerrain(glm::vec3 _pos, int _widthSegments, int _depthSegments);
+    virtual ~CTerrain();
 
     virtual bool Initialize() override;
     virtual void Update() override;
@@ -13,6 +13,5 @@ public:
 
 protected:
     unsigned int m_mainTexture;
-    unsigned int m_normalTexture;
 };
 

@@ -4,77 +4,71 @@
 CPhongCube::CPhongCube(glm::vec3 _pos)
 	: CEntity(_pos)
 {
-	m_vertexCount = 8;
+	int width, height;
+
+	m_mainTexture = CGame::Get()->LoadTexture("RainbowTest.jpg", &width, &height);
+	m_normalTexture = CGame::Get()->LoadTexture("RainbowTestNormal.jpg");
+
+	m_vertexCount = 4 * 6;
 	m_indexCount = 36;
 
 	m_vertices = new Vertex[m_vertexCount];
 	m_indices = new unsigned int[m_indexCount];
 
-	int i = 0;
-	m_vertices[i++] = { glm::vec3(-0.5f, 0.5, 0.5), glm::vec4(0.882f, 0.0313f, 0.91f,1), glm::vec2(0,0), glm::vec3(-0.5f, 0.5, 0.5) };
-	m_vertices[i++] = { glm::vec3(0.5f, 0.5, 0.5), glm::vec4(1,0,0,1), glm::vec2(1,0) , glm::vec3(0.5f, 0.5, 0.5) };
-	m_vertices[i++] = { glm::vec3(0.5f, 0.5, -0.5), glm::vec4(1,1,0,1), glm::vec2(1,1), glm::vec3(0.5f, 0.5, -0.5) };
-	m_vertices[i++] = { glm::vec3(-0.5f, 0.5, -0.5), glm::vec4(0.2f,0.49f,0.82f, 1), glm::vec2(0,1), glm::vec3(-0.5f, 0.5, -0.5) };
+	glm::vec2 halfPixel = glm::vec2(0.5, 0.5) / glm::vec2(width, height);
 
-	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, 0.5), glm::vec4(0.882f, 1, 0.91f,1), glm::vec2(1,1),glm::vec3(-0.5f, -0.5, 0.5) };
-	m_vertices[i++] = { glm::vec3(0.5f, -0.5, 0.5), glm::vec4(1,0,1,1),  glm::vec2(0,1), glm::vec3(0.5f, -0.5, 0.5) };
-	m_vertices[i++] = { glm::vec3(0.5f, -0.5, -0.5), glm::vec4(0,0,1,1), glm::vec2(0,0), glm::vec3(0.5f, -0.5, -0.5) };
-	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, -0.5), glm::vec4(0.5f,0.49f,0.82f, 1), glm::vec2(1,0), glm::vec3(-0.5f, -0.5, -0.5) };
+	int i = 0;
+	// oben
+	m_vertices[i++] = { glm::vec3(-0.5f, 0.5, 0.5),		glm::vec2(0.5 - halfPixel.x,0 + halfPixel.y),	glm::vec3(0, 1, 0) };
+	m_vertices[i++] = { glm::vec3(0.5f, 0.5, 0.5),		glm::vec2(0 + halfPixel.x,0 + halfPixel.y),		glm::vec3(0, 1, 0) };
+	m_vertices[i++] = { glm::vec3(0.5f, 0.5, -0.5),		glm::vec2(0 + halfPixel.x,0.5 - halfPixel.y),	glm::vec3(0, 1, 0) };
+	m_vertices[i++] = { glm::vec3(-0.5f, 0.5, -0.5),	glm::vec2(0.5 - halfPixel.x,0.5 - halfPixel.y), glm::vec3(0, 1, 0) };
+
+	// vorne
+	m_vertices[i++] = { glm::vec3(-0.5f, 0.5, -0.5), glm::vec2(1 - halfPixel.x,0 + halfPixel.y), glm::vec3(0, 0, -1) };
+	m_vertices[i++] = { glm::vec3(0.5f, 0.5, -0.5),		glm::vec2(0.5 + halfPixel.x,0 + halfPixel.y), glm::vec3(0, 0, -1) };
+	m_vertices[i++] = { glm::vec3(0.5f, -0.5, -0.5),	glm::vec2(0.5 + halfPixel.x,0.5 - halfPixel.y), glm::vec3(0, 0, -1) };
+	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, -0.5),  glm::vec2(1 - halfPixel.x,0.5 - halfPixel.y), glm::vec3(0, 0, -1) };
+
+	// rechts
+	m_vertices[i++] = { glm::vec3(0.5f, 0.5, -0.5),  glm::vec2(0.5 - halfPixel.x,0.5 + halfPixel.y), glm::vec3(1, 0, 0) };
+	m_vertices[i++] = { glm::vec3(0.5f, 0.5, 0.5), glm::vec2(0 + halfPixel.x,0.5 + halfPixel.y), glm::vec3(1, 0, 0) };
+	m_vertices[i++] = { glm::vec3(0.5f, -0.5, 0.5), glm::vec2(0 + halfPixel.x,0.75 - halfPixel.y), glm::vec3(1, 0, 0) };
+	m_vertices[i++] = { glm::vec3(0.5f, -0.5, -0.5), glm::vec2(0.5 - halfPixel.x,0.75 - halfPixel.y), glm::vec3(1, 0, 0) };
+
+	// unten
+	m_vertices[i++] = { glm::vec3(0.5f, -0.5, -0.5), glm::vec2(0 + halfPixel.x,0.75 + halfPixel.y), glm::vec3(0, -1, 0) };
+	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, -0.5), glm::vec2(0.5 - halfPixel.x,0.75 + halfPixel.y), glm::vec3(0, -1, 0) };
+	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, 0.5), glm::vec2(0.5 - halfPixel.x,1 - halfPixel.y), glm::vec3(0, -1, 0) };
+	m_vertices[i++] = { glm::vec3(0.5f, -0.5, 0.5), glm::vec2(0 + halfPixel.x,1 - halfPixel.y), glm::vec3(0, -1, 0) };
+
+	// hinten
+	m_vertices[i++] = { glm::vec3(0.5f, 0.5, 0.5), glm::vec2(1 - halfPixel.x,0.5 + halfPixel.y) , glm::vec3(0, 0, 1) };
+	m_vertices[i++] = { glm::vec3(-0.5f, 0.5, 0.5), glm::vec2(0.5 + halfPixel.x,0.5 + halfPixel.y) , glm::vec3(0, 0, 1) };
+	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, 0.5), glm::vec2(0.5 + halfPixel.x,0.75 - halfPixel.y) , glm::vec3(0, 0, 1) };
+	m_vertices[i++] = { glm::vec3(0.5f, -0.5, 0.5), glm::vec2(1 - halfPixel.x,0.75 - halfPixel.y) , glm::vec3(0, 0, 1) };
+
+	// links
+	m_vertices[i++] = { glm::vec3(-0.5f, 0.5, 0.5), glm::vec2(1 - halfPixel.x,0.75 + halfPixel.y), glm::vec3(-1, 0, 0) };
+	m_vertices[i++] = { glm::vec3(-0.5f, 0.5, -0.5), glm::vec2(0.5 + halfPixel.x,0.75 + halfPixel.y), glm::vec3(-1, 0, 0) };
+	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, -0.5), glm::vec2(0.5 + halfPixel.x,1 - halfPixel.y), glm::vec3(-1, 0, 0) };
+	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, 0.5), glm::vec2(1 - halfPixel.x,1 - halfPixel.y), glm::vec3(-1, 0, 0) };
 
 	i = 0;
 	// oben
-	m_indices[i++] = 0;
-	m_indices[i++] = 1;
-	m_indices[i++] = 2;
+	for (int j = 0; j < 6; j++)
+	{
 
-	m_indices[i++] = 2;
-	m_indices[i++] = 3;
-	m_indices[i++] = 0;
+		m_indices[i++] = 0 + j * 4;
+		m_indices[i++] = 1 + j * 4;
+		m_indices[i++] = 2 + j * 4;
 
-	// vorne
-	m_indices[i++] = 3;
-	m_indices[i++] = 2;
-	m_indices[i++] = 7;
+		m_indices[i++] = 2 + j * 4;
+		m_indices[i++] = 3 + j * 4;
+		m_indices[i++] = 0 + j * 4;
+	}
 
-	m_indices[i++] = 2;
-	m_indices[i++] = 6;
-	m_indices[i++] = 7;
-
-	// rechts
-	m_indices[i++] = 2;
-	m_indices[i++] = 1;
-	m_indices[i++] = 5;
-
-	m_indices[i++] = 5;
-	m_indices[i++] = 6;
-	m_indices[i++] = 2;
-
-	// hinten
-	m_indices[i++] = 1;
-	m_indices[i++] = 0;
-	m_indices[i++] = 4;
-
-	m_indices[i++] = 4;
-	m_indices[i++] = 5;
-	m_indices[i++] = 1;
-
-	// links
-	m_indices[i++] = 3;
-	m_indices[i++] = 7;
-	m_indices[i++] = 4;
-
-	m_indices[i++] = 4;
-	m_indices[i++] = 0;
-	m_indices[i++] = 3;
-
-	// unten
-	m_indices[i++] = 4;
-	m_indices[i++] = 7;
-	m_indices[i++] = 6;
-
-	m_indices[i++] = 6;
-	m_indices[i++] = 5;
-	m_indices[i++] = 4;
+	
 }
 
 CPhongCube::~CPhongCube()
@@ -111,9 +105,29 @@ bool CPhongCube::Initialize()
 
 	glBindVertexArray(0);
 
-	m_shader = CGame::Get()->m_phongShader;
+	m_shader = CGame::Get()->m_shaders["phong"];
 
 	return true;
+}
+
+void CPhongCube::Update()
+{
+	if (glfwGetKey(CGame::Get()->GetWindow(), GLFW_KEY_LEFT))
+	{
+		m_rotation.x -= CGame::Get()->DeltaTime() * 60;
+	}
+	if (glfwGetKey(CGame::Get()->GetWindow(), GLFW_KEY_RIGHT))
+	{
+		m_rotation.x += CGame::Get()->DeltaTime() * 60;
+	}
+	if (glfwGetKey(CGame::Get()->GetWindow(), GLFW_KEY_DOWN))
+	{
+		m_rotation.y -= CGame::Get()->DeltaTime() * 60;
+	}
+	if (glfwGetKey(CGame::Get()->GetWindow(), GLFW_KEY_UP))
+	{
+		m_rotation.y += CGame::Get()->DeltaTime() * 60;
+	}
 }
 
 void CPhongCube::Render()
@@ -128,10 +142,12 @@ void CPhongCube::Render()
 
 	m_shader->SetMatrix("model", m_modelMatrix);
 
-	// Variablen setzen
-	m_shader->SetFloat("textureBlend", sin(glfwGetTime()) / 2.0f + 0.5f);
-	m_shader->SetVector2("uvZoom", glm::vec2(sin(glfwGetTime()) / 2.0f + 0.5f,
-		cos(glfwGetTime() * 0.23) * 2));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_mainTexture);
+	m_shader->SetInt("mainTex", 0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_normalTexture);
+	m_shader->SetInt("normalTex", 1);
 
 	// Shader benutzung vorbereiten
 	glBindVertexArray(m_VAO);

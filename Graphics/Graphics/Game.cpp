@@ -36,8 +36,9 @@ int CGame::Initialize()
 
 	glClearColor(0, 0.5f, 1, 1);
 
-	m_defaultShader = new CShader("defaultShader.vert", "defaultShader.frag");
-	m_phongShader = new CShader("phongShader.vert", "phongShader.frag");
+	m_shaders["default"] = new CShader("defaultShader.vert", "defaultShader.frag");
+	m_shaders["phong"] = new CShader("phongShader.vert", "phongShader.frag");
+	m_shaders["terrain"] = new CShader("terrain.vert", "terrain.frag");
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -50,10 +51,12 @@ int CGame::Initialize()
 
 	m_projectionMatrix = glm::mat4(1.0f);
 	m_projectionMatrix = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f);
-	m_defaultShader->Use();
-	m_defaultShader->SetMatrix("projection", m_projectionMatrix);
-	m_phongShader->Use();
-	m_phongShader->SetMatrix("projection", m_projectionMatrix);
+
+	for (auto itr : m_shaders)
+	{
+		itr.second->Use();
+		itr.second->SetMatrix("projection", m_projectionMatrix);
+	}
 
 	m_AmbientColor = glm::vec3(0.1f, 0.1f, 0.1f);
 	m_DiffuseColor = glm::vec3(0.8f, 0.8f, 0.8f);
@@ -70,7 +73,7 @@ int CGame::Run()
 	double oldTime = glfwGetTime();
 	double currentTime = oldTime;
 
-	
+
 	while (!glfwWindowShouldClose(m_window))
 	{
 		oldTime = currentTime;
@@ -120,18 +123,20 @@ int CGame::Run()
 
 		// Backbuffer clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 		//m_viewMatrix = glm::mat4(1.0f);
 		//m_viewMatrix = glm::translate(m_viewMatrix, m_cameraPos);
-		m_defaultShader->Use();
-		m_defaultShader->SetMatrix("view", glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp));
-		m_phongShader->Use();
-		m_phongShader->SetMatrix("view", glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp));
-		m_phongShader->SetVector3("AmbientColor", m_AmbientColor);
-		m_phongShader->SetVector3("DiffuseColor", m_DiffuseColor);
-		m_phongShader->SetVector3("SpecularColor", m_SpecularColor);
-		m_phongShader->SetVector3("LightDir", m_LightDir);
-		m_phongShader->SetVector3("CameraPos", m_cameraPos);
+
+		for (auto itr : m_shaders)
+		{
+			itr.second->Use();
+			itr.second->SetMatrix("view", glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp));
+			itr.second->SetVector3("AmbientColor", m_AmbientColor);
+			itr.second->SetVector3("DiffuseColor", m_DiffuseColor);
+			itr.second->SetVector3("SpecularColor", m_SpecularColor);
+			itr.second->SetVector3("LightDir", m_LightDir);
+			itr.second->SetVector3("CameraPos", m_cameraPos);
+		}
 
 
 		for (auto itr : m_entitites)
@@ -169,7 +174,11 @@ void CGame::Finalize()
 		delete(itr);
 	}
 
-	m_defaultShader->CleanUp();
+	for (auto itr : m_shaders)
+	{
+		itr.second->CleanUp();
+	}
+	m_shaders.clear();
 	glfwTerminate();
 }
 
@@ -220,6 +229,12 @@ bool CGame::ContainsEntity(CEntity* _entity)
 
 unsigned int CGame::LoadTexture(const char* _path)
 {
+	int width, height;
+	return LoadTexture(_path, &width, &height);
+}
+
+unsigned int CGame::LoadTexture(const char* _path, int* _width, int* _height)
+{
 	unsigned int texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -245,6 +260,8 @@ unsigned int CGame::LoadTexture(const char* _path)
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		}
+		(*_width) = width;
+		(*_height) = height;
 		return texture;
 	}
 	else

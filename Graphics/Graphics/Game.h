@@ -6,7 +6,7 @@
 #include <list>
 #include "Shader.h"
 #include "Entity.h"
-
+#include <map>
 
 void FrameBufferSizeCallback(GLFWwindow* _window, int _width, int _height);
 void MouseCallBack(GLFWwindow* _window, double _xpos, double _ypos);
@@ -14,15 +14,15 @@ void MouseCallBack(GLFWwindow* _window, double _xpos, double _ypos);
 class CGame
 {
 public:
-	const int WINDOW_WIDTH = 800;
-	const int WINDOW_HEIGHT = 600;
+	const int WINDOW_WIDTH = 1280;
+	const int WINDOW_HEIGHT = 1024;
 	const char* WINDOW_TITLE = "Super Fancy Project";
 	const float CAMERA_SPEED = 4;
 	const float CAMERA_ROTATION_SPEED = 5;
 
-
-	CShader* m_defaultShader;
-	CShader* m_phongShader;
+	std::map<const char*, CShader*> m_shaders;
+	//CShader* m_defaultShader;
+	//CShader* m_phongShader;
 
 
 	glm::vec3 m_cameraPos;
@@ -45,6 +45,11 @@ public:
 	inline double DeltaTime()
 	{
 		return m_deltaTime;
+	}
+
+	inline GLFWwindow* GetWindow()
+	{
+		return m_window;
 	}
 
 private:
@@ -77,6 +82,7 @@ public:
 	bool ContainsEntity(CEntity* _entity);
 
 	unsigned int LoadTexture(const char* _path);
+	unsigned int LoadTexture(const char* _path, int* _width, int* _height);
 
 private:
 	void LoadLevel();

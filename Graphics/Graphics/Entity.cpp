@@ -39,7 +39,7 @@ bool CEntity::Initialize()
 
 	glBindVertexArray(0);
 
-	m_shader = CGame::Get()->m_defaultShader;
+	m_shader = CGame::Get()->m_shaders["default"];
 
     return true;
 }

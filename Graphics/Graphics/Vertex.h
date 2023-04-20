@@ -18,6 +18,14 @@ struct Vertex
 		normal = glm::vec3(0,0,0);
 	}
 
+	Vertex(glm::vec3 _position, glm::vec3 _normal)
+	{
+		pos = _position;
+		col = glm::vec4(1, 1, 1, 1);
+		uv = glm::vec2(0, 0);
+		normal = _normal;
+	}
+
 	Vertex(glm::vec3 _position, glm::vec4 _color, glm::vec2 _uv)
 	{
 		pos = _position;
@@ -30,6 +38,14 @@ struct Vertex
 	{
 		pos = _position;
 		col = _color;
+		uv = _uv;
+		normal = _normal;
+	}
+
+	Vertex(glm::vec3 _position, glm::vec2 _uv, glm::vec3 _normal)
+	{
+		pos = _position;
+		col = glm::vec4(1,1,1,1);
 		uv = _uv;
 		normal = _normal;
 	}
