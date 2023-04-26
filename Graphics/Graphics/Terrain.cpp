@@ -2,14 +2,15 @@
 #include "Game.h"
 
 CTerrain::CTerrain(glm::vec3 _pos, int _widthSegments, int _depthSegments)
-    : CEntity(_pos)
+	: CEntity(_pos)
 {
 	int width, height;
 
-	m_mainTexture = CGame::Get()->LoadTexture("Heightmap.jpg", &width, &height);
+	m_mainTexture = CGame::Get()->LoadTexture("Terrrain.jpg", &width, &height);
+	m_heightMap = CGame::Get()->LoadTexture("Heightmap.jpg", &width, &height);
 
-	m_vertexCount = 0;
-	m_indexCount = 0;
+	m_vertexCount = (_widthSegments + 1) * (_depthSegments + 1);
+	m_indexCount = _widthSegments * _depthSegments * 2 * 3;
 
 	m_vertices = new Vertex[m_vertexCount];
 	m_indices = new unsigned int[m_indexCount];
@@ -17,10 +18,29 @@ CTerrain::CTerrain(glm::vec3 _pos, int _widthSegments, int _depthSegments)
 	glm::vec2 halfPixel = glm::vec2(0.5, 0.5) / glm::vec2(width, height);
 
 	int i = 0;
-	m_vertices[i++] = { glm::vec3(-0.5f, 0.5, 0.5), glm::vec3(0,1,0)};
+	for (int z = 0; z < _depthSegments; z++)
+	{
+		for (int x = 0; x < _widthSegments; x++)
+		{
+			m_vertices[i++] = Vertex(glm::vec3(x, 0.0, z) * 0.1f, glm::vec2(x/ (_widthSegments - 1.0f), z / (_depthSegments - 1.0f)), glm::vec3(0, 1, 0));
+		}
+	}
 
 	i = 0;
-	m_indices = 0;
+
+	for (int z = 0; z < _depthSegments; z++)
+	{
+		for (int x = 0; x < _widthSegments; x++)
+		{
+			m_indices[i++] = x + (z * (_widthSegments + 1));
+			m_indices[i++] = x + ((z + 1) * (_widthSegments + 1));
+			m_indices[i++] = x + (z * (_widthSegments + 1)) + 1;
+
+			m_indices[i++] = x + (z * (_widthSegments + 1)) + 1;
+			m_indices[i++] = x + ((z + 1) * (_widthSegments + 1));
+			m_indices[i++] = x + ((z + 1) * (_widthSegments + 1)) + 1;
+		}
+	}
 }
 
 CTerrain::~CTerrain()
@@ -57,13 +77,14 @@ bool CTerrain::Initialize()
 
 	glBindVertexArray(0);
 
-	m_shader = CGame::Get()->m_shaders["phong"];
+	m_shader = CGame::Get()->m_shaders["terrain"];
 
 	return true;
 }
 
 void CTerrain::Update()
 {
+	m_position.x += CGame::Get()->DeltaTime() * 0.1f;
 }
 
 void CTerrain::Render()
@@ -78,9 +99,14 @@ void CTerrain::Render()
 
 	m_shader->SetMatrix("model", m_modelMatrix);
 
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_mainTexture);
 	m_shader->SetInt("mainTex", 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_heightMap);
+	m_shader->SetInt("heightMap", 1);
 
 	// Shader benutzung vorbereiten
 	glBindVertexArray(m_VAO);

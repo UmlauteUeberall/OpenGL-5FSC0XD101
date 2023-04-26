@@ -37,10 +37,10 @@ CPhongCube::CPhongCube(glm::vec3 _pos)
 	m_vertices[i++] = { glm::vec3(0.5f, -0.5, -0.5), glm::vec2(0.5 - halfPixel.x,0.75 - halfPixel.y), glm::vec3(1, 0, 0) };
 
 	// unten
-	m_vertices[i++] = { glm::vec3(0.5f, -0.5, -0.5), glm::vec2(0 + halfPixel.x,0.75 + halfPixel.y), glm::vec3(0, -1, 0) };
-	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, -0.5), glm::vec2(0.5 - halfPixel.x,0.75 + halfPixel.y), glm::vec3(0, -1, 0) };
-	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, 0.5), glm::vec2(0.5 - halfPixel.x,1 - halfPixel.y), glm::vec3(0, -1, 0) };
 	m_vertices[i++] = { glm::vec3(0.5f, -0.5, 0.5), glm::vec2(0 + halfPixel.x,1 - halfPixel.y), glm::vec3(0, -1, 0) };
+	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, 0.5), glm::vec2(0.5 - halfPixel.x,1 - halfPixel.y), glm::vec3(0, -1, 0) };
+	m_vertices[i++] = { glm::vec3(-0.5f, -0.5, -0.5), glm::vec2(0.5 - halfPixel.x,0.75 + halfPixel.y), glm::vec3(0, -1, 0) };
+	m_vertices[i++] = { glm::vec3(0.5f, -0.5, -0.5), glm::vec2(0 + halfPixel.x,0.75 + halfPixel.y), glm::vec3(0, -1, 0) };
 
 	// hinten
 	m_vertices[i++] = { glm::vec3(0.5f, 0.5, 0.5), glm::vec2(1 - halfPixel.x,0.5 + halfPixel.y) , glm::vec3(0, 0, 1) };

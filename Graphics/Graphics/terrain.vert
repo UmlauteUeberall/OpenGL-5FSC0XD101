@@ -12,15 +12,20 @@ out vec2 ourUV;
 out vec3 ourNormal;
 out vec3 ourWorldPos;
 
+uniform sampler2D heightMap;
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
 void main()
 {
-	gl_Position = projection * view * model * vec4(aPos, 1.0); // Mit 1 erweiten für Positionen
-	ourNormal = (model * vec4(aNormal, 0)).xyz; // Lichtberechnungen immer im Worldspace, Mit 0 erweitern für Richtungen
 	ourWorldPos = (model * vec4(aPos, 1)).xyz;
+	float delta = texture(heightMap, aUV).r;
+	ourWorldPos.y += delta * 10;
+
+	gl_Position = projection * view * vec4(ourWorldPos, 1.0); // Mit 1 erweiten für Positionen
+	ourNormal = (model * vec4(aNormal, 0)).xyz; // Lichtberechnungen immer im Worldspace, Mit 0 erweitern für Richtungen
 	ourColor = aColor;
 	ourUV = aUV;
 }

@@ -4,6 +4,7 @@
 #include "Quad.h"
 #include "Cube.h"
 #include "PhongCube.h"
+#include "Terrain.h"
 
 
 int CGame::Initialize()
@@ -44,6 +45,10 @@ int CGame::Initialize()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
 
 	m_cameraPos = glm::vec3(0, 4, -5);
 	m_cameraYaw = 90;
@@ -281,6 +286,10 @@ void CGame::LoadLevel()
 	}
 
 	AddEntity(new CPhongCube(glm::vec3(0, 1, -2)));
+
+	AddEntity(new CTerrain(glm::vec3(0, -10, 0), 100, 50));
+	//AddEntity(new CPhongCube(glm::vec3(0, -10, -2)));
+
 }
 
 void FrameBufferSizeCallback(GLFWwindow* _window, int _width, int _height)

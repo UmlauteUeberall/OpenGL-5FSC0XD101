@@ -109,5 +109,8 @@
     <CopyFileToFolders Include="terrain.vert">
       <Filter>Ressourcendateien</Filter>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="Content\Heightmap.jpg">
+      <Filter>Ressourcendateien</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

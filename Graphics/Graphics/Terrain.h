@@ -13,5 +13,6 @@ public:
 
 protected:
     unsigned int m_mainTexture;
+    unsigned int m_heightMap;
 };
 

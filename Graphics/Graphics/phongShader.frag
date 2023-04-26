@@ -25,7 +25,7 @@ uniform sampler2D normalTex;
 void main()
 {
 	vec3 texColor = texture(mainTex, ourUV).rgb * ourColor;
-	vec3 normal = normalize((model * vec4(texture(normalTex, ourUV).rgb, 0)).rgb + normalize(ourNormal));
+	vec3 normal = normalize((model * vec4(texture(normalTex, ourUV).rgb * 2 - vec3(1,1,1), 0)).rgb);
 
 	// Grundhelligkeit, Deutlich günstiger als alles zu Raytracen
 	// Color

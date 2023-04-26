@@ -13,7 +13,7 @@ struct Vertex
 	Vertex()
 	{
 		pos = glm::vec3(0, 0, 0);
-		col = glm::vec4(0, 0, 0, 0);
+		col = glm::vec4(1, 1, 1, 1);
 		uv = glm::vec2(0, 0);
 		normal = glm::vec3(0,0,0);
 	}

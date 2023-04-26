@@ -19,13 +19,29 @@ uniform vec3 CameraPos;
 uniform mat4 model;
 
 uniform sampler2D mainTex;
-uniform sampler2D normalTex;
+uniform sampler2D heightMap;
+
+//uniform sampler2D normalTex;
 
 
 void main()
 {
-	vec3 texColor = texture(mainTex, ourUV).rgb * ourColor;
-	vec3 normal = normalize((model * vec4(texture(normalTex, ourUV).rgb, 0)).rgb + normalize(ourNormal));
+
+	vec3 normal = normalize(vec3(texture(heightMap, ourUV - vec2(0.5/512, 0)).r 
+							- texture(heightMap, ourUV + vec2(0.5/512, 0)).r,
+						0.5,
+						texture(heightMap, ourUV - vec2(0,0.5/512)).r 
+							- texture(heightMap, ourUV + vec2(0, 0.5/512)).r));
+
+	vec3 colXY = texture(mainTex, ourWorldPos.xy).rgb * ourColor;
+	vec3 colZY = texture(mainTex, ourWorldPos.zy).rgb * ourColor;
+	vec3 colXZ = texture(mainTex, ourWorldPos.xz).rgb * ourColor;
+
+	vec3 weight = abs(normal);
+	weight = normalize(pow(weight, 10);
+
+	vec3 texColor = colXZ * weight.y + colXY * weight.z + colZY * weight.x;
+	//vec3 normal = normalize((model * vec4(texture(normalTex, ourUV).rgb, 0)).rgb + normalize(ourNormal));
 
 	// Grundhelligkeit, Deutlich günstiger als alles zu Raytracen
 	// Color
