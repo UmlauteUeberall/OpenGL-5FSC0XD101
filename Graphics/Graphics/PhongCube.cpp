@@ -112,19 +112,19 @@ bool CPhongCube::Initialize()
 
 void CPhongCube::Update()
 {
-	if (glfwGetKey(CGame::Get()->GetWindow(), GLFW_KEY_LEFT))
+	if (CGame::Get()->Key( GLFW_KEY_LEFT))
 	{
 		m_rotation.x -= CGame::Get()->DeltaTime() * 60;
 	}
-	if (glfwGetKey(CGame::Get()->GetWindow(), GLFW_KEY_RIGHT))
+	if (CGame::Get()->Key(GLFW_KEY_RIGHT))
 	{
 		m_rotation.x += CGame::Get()->DeltaTime() * 60;
 	}
-	if (glfwGetKey(CGame::Get()->GetWindow(), GLFW_KEY_DOWN))
+	if (CGame::Get()->Key(GLFW_KEY_DOWN))
 	{
 		m_rotation.y -= CGame::Get()->DeltaTime() * 60;
 	}
-	if (glfwGetKey(CGame::Get()->GetWindow(), GLFW_KEY_UP))
+	if (CGame::Get()->Key(GLFW_KEY_UP))
 	{
 		m_rotation.y += CGame::Get()->DeltaTime() * 60;
 	}

@@ -27,18 +27,17 @@ uniform sampler2D heightMap;
 void main()
 {
 
-	vec3 normal = normalize(vec3(texture(heightMap, ourUV - vec2(0.5/512, 0)).r 
-							- texture(heightMap, ourUV + vec2(0.5/512, 0)).r,
-						0.5,
-						texture(heightMap, ourUV - vec2(0,0.5/512)).r 
-							- texture(heightMap, ourUV + vec2(0, 0.5/512)).r));
+	vec3 normal = normalize(vec3((texture(heightMap, ourUV - vec2(0.5f/512, 0)).r - texture(heightMap, ourUV + vec2(0.5f/512, 0)).r),
+							0.01,
+							(texture(heightMap, ourUV - vec2(0, 0.5f/512)).r - texture(heightMap, ourUV + vec2(0, 0.5f/512)).r)
+		));
 
 	vec3 colXY = texture(mainTex, ourWorldPos.xy).rgb * ourColor;
 	vec3 colZY = texture(mainTex, ourWorldPos.zy).rgb * ourColor;
 	vec3 colXZ = texture(mainTex, ourWorldPos.xz).rgb * ourColor;
 
-	vec3 weight = abs(normal);
-	weight = normalize(pow(weight, 10);
+	vec3 weight = vec3(abs(normal.x), abs(normal.y),abs(normal.z));
+	weight = normalize(vec3(pow(weight.x, 10), pow(weight.y, 10), pow(weight.z, 10)));
 
 	vec3 texColor = colXZ * weight.y + colXY * weight.z + colZY * weight.x;
 	//vec3 normal = normalize((model * vec4(texture(normalTex, ourUV).rgb, 0)).rgb + normalize(ourNormal));
@@ -61,7 +60,7 @@ void main()
 	vec3 halfVector = normalize(normalize(CameraPos - ourWorldPos) + normalize(-LightDir));
 	float dotP = dot(halfVector, normal);
 	dotP = pow(dotP, 100);
-	vec3 specularLight = clamp(SpecularColor * dotP, 0, 1);
+	vec3 specularLight = clamp(SpecularColor * dotP, 0, 1) * 0.05;
 
 	FragColor = vec4(ambientLight + diffuseLight + specularLight, 1);
 }

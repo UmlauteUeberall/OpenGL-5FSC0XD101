@@ -5,6 +5,7 @@
 #include "Cube.h"
 #include "PhongCube.h"
 #include "Terrain.h"
+#include "ObjectSpaceCube.h"
 
 
 int CGame::Initialize()
@@ -25,9 +26,11 @@ int CGame::Initialize()
 		return -2;
 	}
 
+	// Entferne wenn kein 2. Bildschirm rechts
+	glfwSetWindowPos(m_window, 1980, 000);
+
 	glfwMakeContextCurrent(m_window);
 	glfwSetFramebufferSizeCallback(m_window, FrameBufferSizeCallback);
-	glfwSetCursorPosCallback(m_window, MouseCallBack);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -40,6 +43,7 @@ int CGame::Initialize()
 	m_shaders["default"] = new CShader("defaultShader.vert", "defaultShader.frag");
 	m_shaders["phong"] = new CShader("phongShader.vert", "phongShader.frag");
 	m_shaders["terrain"] = new CShader("terrain.vert", "terrain.frag");
+	m_shaders["objectSpace"] = new CShader("ObjectSpaceTest.vert", "ObjectSpaceTest.frag");
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -49,6 +53,12 @@ int CGame::Initialize()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
+
+	m_frameBuffer = new CFrameBuffer();
+	m_frameBuffer->Initialize();
+
+	ZeroMemory(m_currentKeys, sizeof(m_currentKeys));
+	ZeroMemory(m_oldKeys, sizeof(m_oldKeys));
 
 	m_cameraPos = glm::vec3(0, 4, -5);
 	m_cameraYaw = 90;
@@ -85,33 +95,43 @@ int CGame::Run()
 		currentTime = glfwGetTime();
 		m_deltaTime = currentTime - oldTime;
 
-		if (glfwGetKey(m_window, GLFW_KEY_A))
+		ProcessInput();
+
+		glm::vec3 move = glm::vec3(0, 0, 0);
+
+		if (Key(GLFW_KEY_A))
 		{
-			m_cameraPos.x += m_deltaTime * CAMERA_SPEED;
+			move.x -= 1;
 		}
-		if (glfwGetKey(m_window, GLFW_KEY_D))
+		if (Key(GLFW_KEY_D))
 		{
-			m_cameraPos.x -= m_deltaTime * CAMERA_SPEED;
+			move.x += 1;
 		}
-		if (glfwGetKey(m_window, GLFW_KEY_W))
+		if (Key(GLFW_KEY_W))
 		{
-			m_cameraPos.z += m_deltaTime * CAMERA_SPEED;
+			move.z += 1;
 		}
-		if (glfwGetKey(m_window, GLFW_KEY_S))
+		if (Key(GLFW_KEY_S))
 		{
-			m_cameraPos.z -= m_deltaTime * CAMERA_SPEED;
+			move.z -= 1;
 		}
-		if (glfwGetKey(m_window, GLFW_KEY_Q))
+		if (Key(GLFW_KEY_Q))
 		{
-			m_cameraPos.y -= m_deltaTime * CAMERA_SPEED;
+			move.y -= 1;
 		}
-		if (glfwGetKey(m_window, GLFW_KEY_E))
+		if (Key(GLFW_KEY_E))
 		{
-			m_cameraPos.y += m_deltaTime * CAMERA_SPEED;
+			move.y += 1;
+		}
+		if (move.x != 0 || move.y != 0 || move.z != 0)
+		{
+			move = glm::normalize(m_cameraRight * move.x + m_cameraUp * move.y + m_cameraFront * move.z);
+
+			m_cameraPos += move * (float) m_deltaTime * CAMERA_SPEED;
 		}
 
-		//m_cameraYaw += m_mouseDelta.x * m_deltaTime * CAMERA_ROTATION_SPEED;
-		//m_cameraPitch += m_mouseDelta.y * m_deltaTime * CAMERA_ROTATION_SPEED;
+		m_cameraYaw += m_mouseDelta.x * m_deltaTime * CAMERA_ROTATION_SPEED;
+		m_cameraPitch -= m_mouseDelta.y * m_deltaTime * CAMERA_ROTATION_SPEED;
 
 		m_cameraFront.x = cos(glm::radians(m_cameraYaw)) * cos(glm::radians(m_cameraPitch));
 		m_cameraFront.y = sin(glm::radians(m_cameraPitch));
@@ -121,13 +141,25 @@ int CGame::Run()
 		m_cameraRight = glm::normalize(glm::cross(m_cameraFront, glm::vec3(0, 1, 0)));
 		m_cameraUp = glm::normalize(glm::cross(m_cameraRight, m_cameraFront));
 
+		static bool wireframe = false;
+		if (KeyDown(GLFW_KEY_F6))
+		{
+			wireframe = !wireframe;
+			glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+		}
+		if (KeyDown(GLFW_KEY_ESCAPE))
+		{
+			glfwSetWindowShouldClose(m_window, GL_TRUE);
+		}
+
 		for (auto itr : m_entitites)
 		{
 			itr->Update();
 		}
 
 		// Backbuffer clear
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		m_frameBuffer->RenderFirst();
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//m_viewMatrix = glm::mat4(1.0f);
 		//m_viewMatrix = glm::translate(m_viewMatrix, m_cameraPos);
@@ -148,6 +180,9 @@ int CGame::Run()
 		{
 			itr->Render();
 		}
+		glBindVertexArray(0);
+
+		m_frameBuffer->RenderSecond();
 
 		for (auto itr : m_entititesToDelete)
 		{
@@ -156,7 +191,6 @@ int CGame::Run()
 			delete(itr);
 		}
 
-		glBindVertexArray(0);
 		glfwSwapBuffers(m_window);
 		glfwPollEvents();
 	}
@@ -184,6 +218,7 @@ void CGame::Finalize()
 		itr.second->CleanUp();
 	}
 	m_shaders.clear();
+	m_frameBuffer->CleanUp();
 	glfwTerminate();
 }
 
@@ -271,10 +306,27 @@ unsigned int CGame::LoadTexture(const char* _path, int* _width, int* _height)
 	}
 	else
 	{
-		std::cout << "Failed to load texture" << std::endl;
+		std::cout << "Failed to load texture: " << _path << std::endl;
 		return -4;
 	}
 	stbi_image_free(data);
+}
+
+bool CGame::KeyDown(int _keyCode)
+{
+	return m_currentKeys[_keyCode - 32]
+		&& !m_oldKeys[_keyCode - 32];
+}
+
+bool CGame::KeyUp(int _keyCode)
+{
+	return !m_currentKeys[_keyCode - 32]
+		&& m_oldKeys[_keyCode - 32];
+}
+
+bool CGame::Key(int _keyCode)
+{
+	return m_currentKeys[_keyCode - 32];
 }
 
 void CGame::LoadLevel()
@@ -287,19 +339,33 @@ void CGame::LoadLevel()
 
 	AddEntity(new CPhongCube(glm::vec3(0, 1, -2)));
 
-	AddEntity(new CTerrain(glm::vec3(0, -10, 0), 100, 50));
+	AddEntity(new CTerrain(glm::vec3(0, -10, 0), 100, 100));
 	//AddEntity(new CPhongCube(glm::vec3(0, -10, -2)));
 
+	AddEntity(new CObjectSpaceCube(glm::vec3(0, 2.5f, 0)));
+	AddEntity(new CObjectSpaceCube(glm::vec3(1.25,2.5f, 0)));
+}
+
+void CGame::ProcessInput()
+{
+	memcpy(m_oldKeys, m_currentKeys, sizeof(m_currentKeys));
+
+	for (int i = 0; i < sizeof(m_currentKeys); i++)
+	{
+		m_currentKeys[i] = glfwGetKey(m_window, i + 32);
+	}
+
+	static double mpx, mpy;
+	glfwGetCursorPos(m_window, &mpx, &mpy);
+
+	static glm::vec2 halfScreen = glm::vec2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+
+	m_mouseDelta = glm::vec2(mpx, mpy) - halfScreen;
+
+	glfwSetCursorPos(m_window, halfScreen.x, halfScreen.y);
 }
 
 void FrameBufferSizeCallback(GLFWwindow* _window, int _width, int _height)
 {
 	glViewport(0, 0, _width, _height);
-}
-
-void MouseCallBack(GLFWwindow* _window, double _xpos, double _ypos)
-{
-	glm::vec2 mousePos = glm::vec2(_xpos, _ypos);
-
-	CGame::Get()->m_mouseDelta = mousePos - CGame::Get()->m_oldMousePos;
 }

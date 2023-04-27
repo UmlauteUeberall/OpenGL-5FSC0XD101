@@ -6,7 +6,7 @@ CTerrain::CTerrain(glm::vec3 _pos, int _widthSegments, int _depthSegments)
 {
 	int width, height;
 
-	m_mainTexture = CGame::Get()->LoadTexture("Terrrain.jpg", &width, &height);
+	m_mainTexture = CGame::Get()->LoadTexture("Terrain.jpg", &width, &height);
 	m_heightMap = CGame::Get()->LoadTexture("Heightmap.jpg", &width, &height);
 
 	m_vertexCount = (_widthSegments + 1) * (_depthSegments + 1);
@@ -18,11 +18,11 @@ CTerrain::CTerrain(glm::vec3 _pos, int _widthSegments, int _depthSegments)
 	glm::vec2 halfPixel = glm::vec2(0.5, 0.5) / glm::vec2(width, height);
 
 	int i = 0;
-	for (int z = 0; z < _depthSegments; z++)
+	for (int z = 0; z < _depthSegments + 1; z++)
 	{
-		for (int x = 0; x < _widthSegments; x++)
+		for (int x = 0; x < _widthSegments + 1; x++)
 		{
-			m_vertices[i++] = Vertex(glm::vec3(x, 0.0, z) * 0.1f, glm::vec2(x/ (_widthSegments - 1.0f), z / (_depthSegments - 1.0f)), glm::vec3(0, 1, 0));
+			m_vertices[i++] = Vertex(glm::vec3(x, 0.0, z) * 0.2f, glm::vec2(x/ (_widthSegments - 1.0f), z / (_depthSegments - 1.0f)), glm::vec3(0, 1, 0));
 		}
 	}
 
@@ -84,7 +84,6 @@ bool CTerrain::Initialize()
 
 void CTerrain::Update()
 {
-	m_position.x += CGame::Get()->DeltaTime() * 0.1f;
 }
 
 void CTerrain::Render()

@@ -50,3 +50,21 @@ struct Vertex
 		normal = _normal;
 	}
 };
+
+struct Vertex2D
+{
+	glm::vec2 pos;
+	glm::vec2 uv;
+
+	Vertex2D()
+	{
+		pos = glm::vec2(0, 0);
+		uv = glm::vec2(0, 0);
+	}
+
+	Vertex2D(glm::vec2 _pos, glm::vec2 _uv)
+	{
+		pos = _pos;
+		uv = _uv;
+	}
+};

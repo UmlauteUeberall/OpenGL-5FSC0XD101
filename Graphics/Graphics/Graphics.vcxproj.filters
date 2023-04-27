@@ -45,6 +45,12 @@
     <ClCompile Include="Terrain.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="ObjectSpaceCube.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameBuffer.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -72,6 +78,12 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="Terrain.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectSpaceCube.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameBuffer.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
@@ -110,6 +122,21 @@
       <Filter>Ressourcendateien</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="Content\Heightmap.jpg">
+      <Filter>Ressourcendateien</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Content\Terrain.jpg">
+      <Filter>Ressourcendateien</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="ObjectSpaceTest.frag">
+      <Filter>Ressourcendateien</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="ObjectSpaceTest.vert">
+      <Filter>Ressourcendateien</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="FrameBuffer.frag">
+      <Filter>Ressourcendateien</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="FrameBuffer.vert">
       <Filter>Ressourcendateien</Filter>
     </CopyFileToFolders>
   </ItemGroup>

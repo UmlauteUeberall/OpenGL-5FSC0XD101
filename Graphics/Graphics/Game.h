@@ -7,9 +7,10 @@
 #include "Shader.h"
 #include "Entity.h"
 #include <map>
+#include "FrameBuffer.h"
 
 void FrameBufferSizeCallback(GLFWwindow* _window, int _width, int _height);
-void MouseCallBack(GLFWwindow* _window, double _xpos, double _ypos);
+//void MouseCallBack(GLFWwindow* _window, double _xpos, double _ypos);
 
 class CGame
 {
@@ -37,10 +38,12 @@ public:
 
 	float m_cameraYaw;
 	float m_cameraPitch;
-
-	glm::vec2 m_oldMousePos;
-	glm::vec2 m_mouseDelta;
 	//float Roll;
+
+	glm::vec2 m_mouseDelta;
+
+	byte m_oldKeys[316];
+	byte m_currentKeys[316];
 
 	inline double DeltaTime()
 	{
@@ -58,6 +61,8 @@ private:
 
 	std::list<CEntity*> m_entitites;
 	std::list<CEntity*> m_entititesToDelete;
+
+	CFrameBuffer* m_frameBuffer;
 
 	//glm::mat4 m_viewMatrix;
 	glm::mat4 m_projectionMatrix;
@@ -84,7 +89,11 @@ public:
 	unsigned int LoadTexture(const char* _path);
 	unsigned int LoadTexture(const char* _path, int* _width, int* _height);
 
+	bool KeyDown(int _keyCode);
+	bool KeyUp(int _keyCode);
+	bool Key(int _keyCode);
 private:
 	void LoadLevel();
+	void ProcessInput();
 };
 
